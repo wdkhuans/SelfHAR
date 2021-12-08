@@ -77,20 +77,20 @@ def process_motion_sense_accelerometer_files(accelerometer_data_folder_path):
 
     # Loop through every trial folder
     for trial_folder in all_trials_folders:
-        trial_name = os.path.split(trial_folder)[-1]
+        trial_name = os.path.split(trial_folder)[-1] # 'dws_1'
 
         # label of the trial is given in the folder name, separated by underscore
-        label = trial_name.split("_")[0]
+        label = trial_name.split("_")[0] # 'dws
         # label_set[label] = True
         print(trial_folder)
         
         # Loop through files for every user of the trail
-        for trial_user_file in sorted(glob.glob(trial_folder + "/*.csv")):
+        for trial_user_file in sorted(glob.glob(trial_folder + "/*.csv")): # 'run/original_datasets/motionsense/B_Accelerometer_data/dws_1/sub_1.csv'
 
             # use regex to match the user id
             user_id_match = re.search(r'(?P<user_id>[0-9]+)\.csv', os.path.split(trial_user_file)[-1])
             if user_id_match is not None:
-                user_id = int(user_id_match.group('user_id'))
+                user_id = int(user_id_match.group('user_id')) # 1
 
                 # Read file
                 user_trial_dataset = pd.read_csv(trial_user_file)

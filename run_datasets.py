@@ -125,7 +125,7 @@ def get_parser():
         description='SelfHAR datasets download and processing script')
     parser.add_argument('--working_directory', default='run',
                         help='the output directory of the downloads and processed datasets')
-    parser.add_argument('--mode', default='download_and_process', 
+    parser.add_argument('--mode', default='process', 
                         choices=['download_and_process', 'download', 'process'],
                         help='the running mode of the script.\ndownload: download the dataset(s).\nprocess: process the donwloaded dataset(s)')
     parser.add_argument('--dataset', default='all', 
@@ -165,14 +165,14 @@ def download_dataset(data_directory, dataset_metadata):
         print("You did not agree to the terms.")
 
 def process_dataset(data_directory, processed_dataset_directory, dataset_metadata, dataset_file_path=None):
-    dataset_name = dataset_metadata['name']
-    file_name = dataset_metadata['file_name']
+    dataset_name = dataset_metadata['name']    # 'motionsense'
+    file_name = dataset_metadata['file_name']  # 'B_Accelerometer_data.zip'
     
 
     print("Unzipping dataset...")
-    dataset_file_path = args.dataset_file_path
+    dataset_file_path = args.dataset_file_path # None
     if dataset_file_path is None:
-        dataset_file_path = os.path.join(data_directory, dataset_name, file_name)
+        dataset_file_path = os.path.join(data_directory, dataset_name, file_name) # 'run/original_datasets/motionsense/B_Accelerometer_data.zip'
     
     with zipfile.ZipFile(dataset_file_path, 'r') as zip_ref:
         zip_ref.extractall(os.path.join(data_directory, dataset_name))
@@ -200,12 +200,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not os.path.exists(args.working_directory):
-        os.mkdir(args.working_directory)
-    dataset_directory = os.path.join(args.working_directory, ORIGINAL_DATASET_SUB_DIRECTORY)
+        os.mkdir(args.working_directory) # 'run'
+        
+    dataset_directory = os.path.join(args.working_directory, ORIGINAL_DATASET_SUB_DIRECTORY) # 'run/original_datasets'
     if not os.path.exists(dataset_directory):
         os.mkdir(dataset_directory)
 
-    processed_dataset_directory = os.path.join(args.working_directory, PROCESSED_DATASET_SUB_DIRECTORY)
+    processed_dataset_directory = os.path.join(args.working_directory, PROCESSED_DATASET_SUB_DIRECTORY)  # 'run/processed_datasets'
     if not os.path.exists(processed_dataset_directory):
         os.mkdir(processed_dataset_directory)
 

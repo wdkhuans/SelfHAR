@@ -212,19 +212,19 @@ def get_config_default_value_if_none(experiment_config, entry, set_value=True):
 
 if __name__ == '__main__':
     parser = get_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args=[])
 
-    current_time_string = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    working_directory = args.working_directory
-    verbose = args.verbose
-    use_tensor_board_logging = args.use_tensor_board_logging
-    window_size = args.window_size
+    current_time_string = datetime.datetime.now().strftime("%Y%m%d-%H%M%S") # 20211207-172629
+    working_directory = args.working_directory # 'run'
+    verbose = args.verbose # 1
+    use_tensor_board_logging = args.use_tensor_board_logging # True
+    window_size = args.window_size # 400
 
     if use_tensor_board_logging:
-        logs_directory = os.path.join(working_directory, LOGS_SUB_DIRECTORY)
+        logs_directory = os.path.join(working_directory, LOGS_SUB_DIRECTORY) # 'run/logs'
         if not os.path.exists(logs_directory):
             os.mkdir(logs_directory)
-    models_directory = os.path.join(working_directory, MODELS_SUB_DIRECTORY)
+    models_directory = os.path.join(working_directory, MODELS_SUB_DIRECTORY) # 'run/models'
     if not os.path.exists(models_directory):
         os.mkdir(models_directory)
     transform_funcs_vectorized = [
