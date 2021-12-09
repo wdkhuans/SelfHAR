@@ -9,7 +9,7 @@ import distutils.util
 import pprint
 
 import numpy as np
-import tensorflow as tf
+import tensorflow as tfs
 import scipy.constants
 import sklearn
 
@@ -107,15 +107,16 @@ def prepare_dataset(dataset_path, window_size, get_train_test_users, validation_
     with open(dataset_path, 'rb') as f:
         dataset_dict = pickle.load(f)
         user_datasets = dataset_dict['user_split']
-        label_list = dataset_dict['label_list']
+        label_list = dataset_dict['label_list'] # ['sit', 'std', 'wlk', 'ups', 'dws', 'jog']
 
-    label_map = dict([(l, i) for i, l in enumerate(label_list)])
-    output_shape = len(label_list)
+    label_map = dict([(l, i) for i, l in enumerate(label_list)]) # {'sit': 0, 'std': 1, 'wlk': 2, 'ups': 3, 'dws': 4, 'jog': 5}
+    output_shape = len(label_list) # 6
 
     har_users = list(user_datasets.keys())
     train_users, test_users = get_train_test_users(har_users)
     if verbose > 0:
         print(f'Testing users: {test_users}, Training users: {train_users}')
+        # Testing users: [1, 14, 19, 23, 6], Training users: [10, 11, 12, 13, 15, 16, 17, 18, 2, 20, 21, 22, 24, 3, 4, 5, 7, 8, 9]
 
     np_train, np_val, np_test = data_pre_processing.pre_process_dataset_composite(
         user_datasets=user_datasets, 
@@ -141,10 +142,10 @@ def prepare_dataset(dataset_path, window_size, get_train_test_users, validation_
 
 def generate_unlabelled_datasets_variations(unlabelled_data_x, labelled_data_x, labelled_repeat=1, verbose=1):
     if verbose > 0:
-        print("Unlabeled data shape: ", unlabelled_data_x.shape)
+        print("Unlabeled data shape: ", unlabelled_data_x.shape) # (56383, 400, 3)
     
-    labelled_data_repeat = np.repeat(labelled_data_x, labelled_repeat, axis=0)
-    np_unlabelled_combined = np.concatenate([unlabelled_data_x, labelled_data_repeat])
+    labelled_data_repeat = np.repeat(labelled_data_x, labelled_repeat, axis=0) # (4689, 400, 3)
+    np_unlabelled_combined = np.concatenate([unlabelled_data_x, labelled_data_repeat]) # (61072, 400, 3)
     if verbose > 0:
         print(f"Unlabelled Combined shape: {np_unlabelled_combined.shape}")
     gc.collect()
@@ -250,13 +251,13 @@ if __name__ == '__main__':
 
 
     prepared_datasets['labelled'] = prepare_dataset(args.labelled_dataset_path, window_size, get_fixed_split_users, validation_split_proportion=0.1, verbose=verbose)
-    input_shape = prepared_datasets['labelled']['input_shape'] #  (window_size, 3)
-    output_shape = prepared_datasets['labelled']['output_shape']
+    input_shape = prepared_datasets['labelled']['input_shape']     #  (400, 3)
+    output_shape = prepared_datasets['labelled']['output_shape']   #   6
 
 
     with open(args.config, 'r') as f:
         config_file = json.load(f)
-        file_tag = config_file['tag']
+        file_tag = config_file['tag'] # Self_HAR
         experiment_configs = config_file['experiment_configs']
 
     if verbose > 0:
@@ -280,7 +281,7 @@ if __name__ == '__main__':
         
 
         
-        experiment_type = get_config_default_value_if_none(experiment_config, 'type')
+        experiment_type = get_config_default_value_if_none(experiment_config, 'type') # har_full_train
         if experiment_type == 'none':
             continue
             
@@ -288,10 +289,12 @@ if __name__ == '__main__':
             previous_config = None
         else:
             previous_config = experiment_configs[i - experiment_config['previous_config_offset']]
-            # if verbose > 0:
-            #     print("Previous config", previous_config)
+
+        if verbose > 0:
+            print("Previous config: ", previous_config)
 
         tag = f"{current_time_string}_{file_tag}_{get_config_default_value_if_none(experiment_config, 'tag')}"
+        # '20211208-151209_Self_HAR_Teacher_Train'
 
         if experiment_type == 'eval_har':
 
@@ -315,10 +318,10 @@ if __name__ == '__main__':
             continue
 
         
-        initial_learning_rate = get_config_default_value_if_none(experiment_config, 'initial_learning_rate')
-        epochs = get_config_default_value_if_none(experiment_config, 'epochs')
-        batch_size = get_config_default_value_if_none(experiment_config, 'batch_size')
-        optimizer_type = get_config_default_value_if_none(experiment_config, 'optimizer')
+        initial_learning_rate = get_config_default_value_if_none(experiment_config, 'initial_learning_rate') # 0.0003
+        epochs = get_config_default_value_if_none(experiment_config, 'epochs') # 30
+        batch_size = get_config_default_value_if_none(experiment_config, 'batch_size') # 300
+        optimizer_type = get_config_default_value_if_none(experiment_config, 'optimizer') # Adam
         if optimizer_type == 'adam':
             optimizer = tf.keras.optimizers.Adam(learning_rate=initial_learning_rate)
         elif optimizer_type == 'sgd':
@@ -447,7 +450,7 @@ if __name__ == '__main__':
         if experiment_type == 'self_training' or experiment_type == 'self_har':
             if 'unlabelled' not in prepared_datasets:
                 prepared_datasets = load_unlabelled_dataset(prepared_datasets, args.unlabelled_dataset_path, window_size, labelled_repeat, max_unlabelled_windows=args.max_unlabelled_windows)
-            
+                # Unlabelled Combined shape: (44689, 400, 3)
             if previous_config is None or get_config_default_value_if_none(previous_config, 'trained_model_path', set_value=False) == '':
                 print("ERROR No previous model for self-training")
                 break

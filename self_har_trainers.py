@@ -80,8 +80,8 @@ def composite_train_model(
         local_callbacks.append(tensorboard_callback)
 
     training_history = full_model.fit(
-        x=training_set[0],
-        y=training_set[1],
+        x=training_set[0], # (4689, 400, 3)
+        y=training_set[1], # (4689, 6)
         validation_data=(validation_set[0], validation_set[1]),
 
         batch_size=batch_size,
